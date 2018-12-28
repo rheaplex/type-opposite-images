@@ -64,13 +64,15 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
     mapping(address => mapping(address => bool)) internal tokenOwnerToOperators;
 
     // wrapper on minting new 721
-    function mint(address _to) public returns (uint256) {
+    // NO MINTING outside of initial batch minting
+    function _mint(address _to) private returns (uint256) {
         tokenCount++;
         uint256 tokenCount_ = tokenCount;
         tokenIdToTokenOwner[tokenCount_] = _to;
         tokenOwnerToTokenCount[_to]++;
         return tokenCount_;
     }
+    
     //from zepellin ERC721Receiver.sol
     //old version
     bytes4 constant ERC721_RECEIVED_OLD = 0xf0b9e5ba;
@@ -319,12 +321,12 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         // before transferring.
         //does not work with current standard which does not allow approving self, so we must let it fail in that case.
         //0x095ea7b3 == "approve(address,uint256)"
-        bytes memory calldata1 = abi.encodeWithSelector(0x095ea7b3, this, _childTokenId);
+        bytes memory callData = abi.encodeWithSelector(0x095ea7b3, this, _childTokenId);
         assembly {
-            let success := call(gas, _childContract, 0, add(calldata1, 0x20), mload(calldata1), calldata1, 0)
+            let success := call(gas, _childContract, 0, add(callData, 0x20), mload(callData), callData, 0)
         }
         ERC721(_childContract).transferFrom(address(this), _to, _childTokenId);
-        emit TransferChild(tokenId, _to, _childContract, _childTokenId);
+        /*emit TransferChild(tokenId, _to, _childContract, _childTokenId);*/
     }
 
     function transferChildToParent(uint256 _fromTokenId, address _toContract, uint256 _toTokenId, address _childContract, uint256 _childTokenId, bytes calldata _data) external {
@@ -347,7 +349,6 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         ERC721(_childContract).isApprovedForAll(_from, msg.sender) ||
         ERC721(_childContract).getApproved(_childTokenId) == msg.sender);
         ERC721(_childContract).transferFrom(_from, address(this), _childTokenId);
-
     }
 
     function onERC721Received(address _from, uint256 _childTokenId, bytes calldata _data) external returns (bytes4) {
@@ -441,6 +442,12 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
     
     //------------------------------------------------------------
 
+    function batchMint(address _to, uint256 _count) onlyOwner public {
+        for(uint256 i = 0; i < _count; i++) {
+            _mint(_to);
+        }
+    }
+
     function mintTokenWithChildTokens (address _owner,
                                        address _childContract,
                                        uint256[] memory _childTokens)
@@ -450,7 +457,7 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         require(_owner != address(0x0), "_owner must not be 0x0");
         require(_childContract != address(0x0),
                 "_childContract must not be 0x0");
-        uint256 collection = mint(msg.sender);
+        uint256 collection = _mint(msg.sender);
         receiveChild(_owner, collection, _childContract, _childTokens[0]);
         receiveChild(_owner, collection, _childContract, _childTokens[1]);
         receiveChild(_owner, collection, _childContract, _childTokens[2]);
