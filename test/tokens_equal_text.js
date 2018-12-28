@@ -159,14 +159,55 @@ contract('TokensEqualTextERC998', async accounts => {
     }
   });
 
-  // only owner can mint ERC721 tokens
+  it("only owner can batch mint ERC721 tokens", async () => {
+    const erc721 = await TokensEqualTextERC721.deployed();
+    try {
+      await erc721.mintBatch(accounts[1],
+                             [100, 200, 300],
+                             {from: accounts[1]});
+      assert(false, "ERC721 should throw if non-owner calls mintBatch");
+    } catch (error) {}
+  });
 
-  // only owner can mint ERC998 tokens
+  it("only owner can batch mint ERC998 tokens", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    const erc721 = await TokensEqualTextERC721.deployed();
+    try {
+      await erc998.mintTokenWithChildTokens(accounts[1],
+                                            erc721.address,
+                                            [100, 200, 300],
+                                            {from: accounts[1]});
+      assert(true, "ERC998 should throw if non-owner calls mintBatch");
+    } catch (error) {}
+  });
 
-  // owner of ERC721 token can transfer it
+  it("owner can transfer ERC998 tokens", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    try {
+      const result = await erc998.transferFrom(accounts[0],
+                                               accounts[1],
+                                               1);
+    } catch (error) {
+      assert(false, "Owner should be able to transfer ERC998 tokens");
+    }
+  });
 
-  // owner of ERC998 token can transfer it
+  it("only owner can transfer ERC998 tokens", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    try {
+      await erc998.transferFrom(accounts[1],
+                                accounts[2],
+                                2,
+                                {from: accounts[2]});
+      assert(false, "ERC998 should throw if non-owner tries to transfer token");
+    } catch (error) {}
+  });
 
   // owner of ERC998 token can transfer child tokens
-  
+
+  // only owner of ERC998 token can transfer child tokens
+
+  // only ERC998 contract owner can mint new tokens
+
+  // only ERC998 contract owner can accept new tokens
 });

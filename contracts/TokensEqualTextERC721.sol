@@ -14,6 +14,7 @@ contract TokensEqualTextERC721 is ERC721Full, Ownable {
         onlyOwner
         external
     {
+        require(_owner != address(0x0), "_owner must not be 0x0");
         for(uint256 i = 0; i < _tokenIDs.length; i++) {
             _mint(_owner, _tokenIDs[i]);
         }

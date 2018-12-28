@@ -76,6 +76,7 @@ const GROUNDS = [
 
 const ELEMENTS = [FIGURES, BASES, BACKDROPS, GROUNDS]
 
+// MOCK
 const tokenOwnedIDs = tokenID => ELEMENTS.map(x => x[tokenID])
 
 const hexToString = hex => {
@@ -108,14 +109,14 @@ const updateSelect = (parentTokenID) => {
   $(`option[value=${parentTokenID + 1}]`).attr('selected', true)
 }
 
-const updateStrings = (parentTokenID) => {
+const updateStrings = async (parentTokenID) => {
   const ids = tokenOwnedIDs(parentTokenID)
   const strings = idsToStrings(ids)
-  const colours = idsToColours(ids)
-  $('.text').each(async (i, text) => {
-    $(text).text(strings[i])
-    text.style.color = await colours[i]
-  })
+  const colours = await Promise.all(idsToColours(ids))
+  $('.text').remove()
+  for(let i = 0; i < ids.length; i++) {
+    $('#texts').append(`<div class="text" style="color: ${colours[i]};">${strings[i]}</div>`)
+  }
 }
 
 $(document).ready(() => {

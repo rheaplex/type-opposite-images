@@ -447,6 +447,9 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         onlyOwner
         public
     {
+        require(_owner != address(0x0), "_owner must not be 0x0");
+        require(_childContract != address(0x0),
+                "_childContract must not be 0x0");
         uint256 collection = mint(msg.sender);
         receiveChild(_owner, collection, _childContract, _childTokens[0]);
         receiveChild(_owner, collection, _childContract, _childTokens[1]);
