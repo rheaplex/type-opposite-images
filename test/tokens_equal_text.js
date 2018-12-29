@@ -85,27 +85,13 @@ function bnToStr(bn) {
   let hex = bn.toString(16);
   let str = '';
   for (let i = 0; i < hex.length; i += 2) {
-	str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
   }
    return str;
  }
 
 contract('TokensEqualTextERC998', async accounts => {
 
-    it("owner of ERC998 token can transfer child tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const erc721 = await TokensEqualTextERC721.deployed();
-    const token3_0 = await erc998.childTokenByIndex(3, erc721.address, 0)
-    try {
-      const result = await erc998.transferChild(3,
-                                                accounts[3],
-                                                erc721.address,
-                                                token3_0);
-    } catch (error) {
-      assert(false, "Owner should be able to transfer ERC998 child tokens");
-    }
-  });
-/*
   it("correct number of ERC721 tokens should exist", async () => {
     const erc721 = await TokensEqualTextERC721.deployed();
     const numChildren = await erc721.totalSupply();
@@ -129,14 +115,14 @@ contract('TokensEqualTextERC998', async accounts => {
       }
     }
   });
-  
+
   it("correct number of ERC998 tokens should exist", async () => {
     const erc998 = await TokensEqualTextERC998.deployed();
     const numChildren = await erc998.totalChildContracts(NUM_TOKENS + 1);
     assert.equal(numChildren.toNumber(), 0);
   });
-  
-  it("ERC998 tokens should have 1 child contract", async () => {
+
+  it("ERC998 tokens should each have 1 child contract", async () => {
     const erc998 = await TokensEqualTextERC998.deployed();
     for (let i = 1; i <= NUM_TOKENS; i++) {
       const numChildren = await erc998.totalChildContracts(i);
@@ -217,7 +203,21 @@ contract('TokensEqualTextERC998', async accounts => {
     } catch (error) {}
   });
 
-  
+  it("owner of ERC998 token can transfer child tokens", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    const erc721 = await TokensEqualTextERC721.deployed();
+    const token3_0 = await erc998.childTokenByIndex(3, erc721.address, 0)
+    try {
+      const result = await erc998.transferChild(3,
+                                                accounts[3],
+                                                erc721.address,
+                                                token3_0);
+    } catch (error) {
+      assert(false, "Owner should be able to transfer ERC998 child tokens");
+    }
+  });
+
+
   it("only owner of ERC998 token can transfer child tokens", async () => {
     const erc998 = await TokensEqualTextERC998.deployed();
     const erc721 = await TokensEqualTextERC721.deployed();
@@ -231,6 +231,6 @@ contract('TokensEqualTextERC998', async accounts => {
       assert(false, "Only owner should be able to transfer child tokens");
     } catch (error) {}
   });
-*/
+
   // only ERC998 contract owner can accept new tokens
 });

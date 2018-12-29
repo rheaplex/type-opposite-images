@@ -1,10 +1,7 @@
 const TokensEqualTextERC721 = artifacts.require("./TokensEqualTextERC721.sol");
 const TokensEqualTextERC998 = artifacts.require("./TokensEqualTextERC998.sol");
-const TokensEqualTextBuilder
-      = artifacts.require("./TokensEqualTextBuilder.sol");
 
-
-const FIGURES = [ 
+const FIGURES = [
   "0x0636C6173736963616C20706C696E746873000000000000000000000000000000",
   "0x0726564206C616D626F726768696E690000000000000000000000000000000000",
   "0x070616C6D20747265650000000000000000000000000000000000000000000000",
@@ -42,7 +39,7 @@ const BASES = [
   "0x0636865737320626F617264000000000000000000000000000000000000000000"
   ];
 
-const BACKDROPS = [ 
+const BACKDROPS = [
   "0x0707572706C652F70696E6B2073756E206469736B000000000000000000000000",
   "0x073756E206469736B207468726F7567682070696E6B2068617A65000000000000",
   "0x0766964656F20696E746572666572656E63650000000000000000000000000000",
@@ -61,7 +58,7 @@ const BACKDROPS = [
   "0x07265642F70696E6B2073756E206469736B000000000000000000000000000000"
 ];
 
-const GROUNDS = [ 
+const GROUNDS = [
   "0x06379616E2F70696E6B206772616469656E740000000000000000000000000000",
   "0x0676C69746368656420626C61636B000000000000000000000000000000000000",
   "0x0636C6F7564730000000000000000000000000000000000000000000000000000",
@@ -80,44 +77,22 @@ const GROUNDS = [
   "0x06379616E2F6E61767920626C7565206772616469656E74000000000000000000"
 ];
 
-
-let tokensEqualTextERC721;
-let tokensEqualTextERC998;
-let accountZero;
-
-module.exports = function(deployer, network, accounts) {
-  accountZero = accounts[0];
-  deployer.deploy(TokensEqualTextERC721)
-    .then(function (_tokensEqualTextERC721) {
-      tokensEqualTextERC721 = _tokensEqualTextERC721;
-      return tokensEqualTextERC721.mintBatch(accountZero, FIGURES);
-    })
-    .then(function () {
-      return tokensEqualTextERC721.mintBatch(accountZero, BASES);
-    })
-    .then(function () {
-      return tokensEqualTextERC721.mintBatch(accountZero, BACKDROPS);
-    })
-    .then(function () {
-      return tokensEqualTextERC721.mintBatch(accountZero, GROUNDS);
-    })
-    .then(function () {
-      return deployer.deploy(TokensEqualTextERC998);
-    })
-    .then(function (_tokensEqualTextERC998) {
-      tokensEqualTextERC998 = _tokensEqualTextERC998;
-      for(let i = 0; i < FIGURES.length; i++) {
-        tokensEqualTextERC998.mintTokenWithChildTokens(
-          accountZero,
-          tokensEqualTextERC721.address,
-          [FIGURES[i], BASES[i], BACKDROPS[i], GROUNDS[i]]
-        );
-      }
-    });
-  /*
-    return deployer.deploy(TokensEqualTextERC998);
-    })
-    /*  .then(function (tokensEqualTextERC998) {
-    //      tokensEqualTextERC998.initialize(tokens);
-    });*/
+module.exports = (deployer, network, accounts) => {
+  deployer.then(async () => {
+    const tokensEqualTextERC721 = await deployer.deploy(TokensEqualTextERC721);
+    await tokensEqualTextERC721.mintBatch(FIGURES);
+    await tokensEqualTextERC721.mintBatch(BASES);
+    await tokensEqualTextERC721.mintBatch(BACKDROPS);
+    await tokensEqualTextERC721.mintBatch(GROUNDS);
+    const tokensEqualTextERC998 = await deployer.deploy(TokensEqualTextERC998);
+    await tokensEqualTextERC998.mintBatch(16);
+    for(let i = 0; i < FIGURES.length; i++) {
+      const erc998ParentToken = i + 1;
+      await tokensEqualTextERC721.safeTransferToERC998Batch(
+        tokensEqualTextERC998.address,
+        erc998ParentToken,
+        [FIGURES[i], BASES[i], BACKDROPS[i], GROUNDS[i]]
+      );
+    }
+  });
 };

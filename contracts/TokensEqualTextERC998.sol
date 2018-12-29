@@ -63,16 +63,6 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
     // token owner => (operator address => bool)
     mapping(address => mapping(address => bool)) internal tokenOwnerToOperators;
 
-    // wrapper on minting new 721
-    // NO MINTING outside of initial batch minting
-    function _mint(address _to) private returns (uint256) {
-        tokenCount++;
-        uint256 tokenCount_ = tokenCount;
-        tokenIdToTokenOwner[tokenCount_] = _to;
-        tokenOwnerToTokenCount[_to]++;
-        return tokenCount_;
-    }
-    
     //from zepellin ERC721Receiver.sol
     //old version
     bytes4 constant ERC721_RECEIVED_OLD = 0xf0b9e5ba;
@@ -113,13 +103,13 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         }
 
         bool callSuccess;
-        bytes memory calldata2;
+        bytes memory callData;
         // 0xed81cdda == rootOwnerOfChild(address,uint256)
-        calldata2 = abi.encodeWithSelector(0xed81cdda, address(this), _childTokenId);
+        callData = abi.encodeWithSelector(0xed81cdda, address(this), _childTokenId);
         assembly {
-            callSuccess := staticcall(gas, rootOwnerAddress, add(calldata2, 0x20), mload(calldata2), calldata2, 0x20)
+            callSuccess := staticcall(gas, rootOwnerAddress, add(callData, 0x20), mload(callData), callData, 0x20)
             if callSuccess {
-                rootOwner := mload(calldata2)
+                rootOwner := mload(callData)
             }
         }
         if(callSuccess == true && rootOwner >> 224 == ERC998_MAGIC_VALUE) {
@@ -182,11 +172,11 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
             bytes32 rootOwner;
             bool callSuccess;
             // 0xed81cdda == rootOwnerOfChild(address,uint256)
-            bytes memory calldata3 = abi.encodeWithSelector(0xed81cdda, address(this), _tokenId);
+            bytes memory callData = abi.encodeWithSelector(0xed81cdda, address(this), _tokenId);
             assembly {
-                callSuccess := staticcall(gas, _from, add(calldata3, 0x20), mload(calldata3), calldata3, 0x20)
+                callSuccess := staticcall(gas, _from, add(callData, 0x20), mload(callData), callData, 0x20)
                 if callSuccess {
-                    rootOwner := mload(calldata3)
+                    rootOwner := mload(callData)
                 }
             }
             if(callSuccess == true) {
@@ -341,7 +331,7 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         ERC998ERC721BottomUp(_childContract).transferToParent(address(this), _toContract, _toTokenId, _childTokenId, _data);
         emit TransferChild(_fromTokenId, _toContract, _childContract, _childTokenId);
     }
-    
+
     // this contract has to be approved first in _childContract
     function getChild(address _from, uint256 _tokenId, address _childContract, uint256 _childTokenId) external {
         receiveChild(_from, _tokenId, _childContract, _childTokenId);
@@ -376,7 +366,7 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
         require(ERC721(msg.sender).ownerOf(_childTokenId) != address(0), "Child token not owned.");
         return ERC721_RECEIVED_NEW;
     }
-    
+
     function receiveChild(address _from, uint256 _tokenId, address _childContract, uint256 _childTokenId) private {
         require(tokenIdToTokenOwner[_tokenId] != address(0), "_tokenId does not exist.");
         require(childTokenIndex[_tokenId][_childContract][_childTokenId] == 0, "Cannot receive child token because it has already been received.");
@@ -428,40 +418,35 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
 
     //------------------------------------------------------------
     // ERC721 Metadata interface
-    
+
     function name() external pure returns (string memory) {
         return "Tokens Equal Text ERC-998";
     }
-    
+
     function symbol() external pure returns (string memory) {
         return "TET998";
     }
     function tokenURI(uint256) external pure returns (string memory) {
         return "";
     }
-    
+
     //------------------------------------------------------------
 
-    function batchMint(address _to, uint256 _count) onlyOwner public {
+    // wrapper on minting new 721
+    // NO MINTING outside of initial batch minting
+    function _mint(address _to) private returns (uint256) {
+        tokenCount++;
+        uint256 tokenCount_ = tokenCount;
+        tokenIdToTokenOwner[tokenCount_] = _to;
+        tokenOwnerToTokenCount[_to]++;
+        return tokenCount_;
+    }
+
+    function mintBatch(uint256 _count) onlyOwner public {
         for(uint256 i = 0; i < _count; i++) {
-            _mint(_to);
+            // msg.sender will be owner, saving a call to owner()
+            _mint(msg.sender);
         }
     }
 
-    function mintTokenWithChildTokens (address _owner,
-                                       address _childContract,
-                                       uint256[] memory _childTokens)
-        onlyOwner
-        public
-    {
-        require(_owner != address(0x0), "_owner must not be 0x0");
-        require(_childContract != address(0x0),
-                "_childContract must not be 0x0");
-        uint256 collection = _mint(msg.sender);
-        receiveChild(_owner, collection, _childContract, _childTokens[0]);
-        receiveChild(_owner, collection, _childContract, _childTokens[1]);
-        receiveChild(_owner, collection, _childContract, _childTokens[2]);
-        receiveChild(_owner, collection, _childContract, _childTokens[3]);
-    }
-    
 }
