@@ -13,6 +13,8 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721Receiver.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+import './Strings.sol';
+
 interface ERC998ERC721TopDown {
     event ReceivedChild(address indexed _from, uint256 indexed _tokenId, address indexed _childContract, uint256 _childTokenId);
     event TransferChild(uint256 indexed tokenId, address indexed _to, address indexed _childContract, uint256 _childTokenId);
@@ -426,8 +428,18 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
     function symbol() external pure returns (string memory) {
         return "TET998";
     }
-    function tokenURI(uint256) external pure returns (string memory) {
-        return "";
+
+    string private tokenURIBase = "https://robmyers.org/tokens-equal-text/";
+
+    function updateTokenURIBase(string calldata _newBase) onlyOwner external {
+        tokenURIBase = _newBase;
+    }
+
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
+        return Strings.strConcat(
+            tokenURIBase,
+            Strings.uint2str(_tokenId)
+        );
     }
 
     //------------------------------------------------------------

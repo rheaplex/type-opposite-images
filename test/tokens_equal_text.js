@@ -232,5 +232,17 @@ contract('TokensEqualTextERC998', async accounts => {
     } catch (error) {}
   });
 
-  // only ERC998 contract owner can accept new tokens
+  it("token URLs are correct", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    const uri = await erc998.tokenURI(3);
+    assert.equal(uri, "https://robmyers.org/tokens-equal-text/3")
+  });
+
+  it("token URLs can be updated", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    await erc998.updateTokenURIBase("aaa://newurl/");
+    const uri = await erc998.tokenURI(3);
+    assert.equal(uri, "aaa://newurl/3")
+  });
+
 });
