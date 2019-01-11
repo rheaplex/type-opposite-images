@@ -15,6 +15,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import './Strings.sol';
 
+
 interface ERC998ERC721TopDown {
     event ReceivedChild(address indexed _from, uint256 indexed _tokenId, address indexed _childContract, uint256 _childTokenId);
     event TransferChild(uint256 indexed tokenId, address indexed _to, address indexed _childContract, uint256 _childTokenId);
@@ -32,12 +33,14 @@ interface ERC998ERC721TopDown {
     function getChild(address _from, uint256 _tokenId, address _childContract, uint256 _childTokenId) external;
 }
 
+
 interface ERC998ERC721TopDownEnumerable {
     function totalChildContracts(uint256 _tokenId) external view returns (uint256);
     function childContractByIndex(uint256 _tokenId, uint256 _index) external view returns (address childContract);
     function totalChildTokens(uint256 _tokenId, address _childContract) external view returns (uint256);
     function childTokenByIndex(uint256 _tokenId, address _childContract, uint256 _index) external view returns (uint256 childTokenId);
 }
+
 
 interface ERC998ERC721BottomUp {
     function transferToParent(address _from, address _toContract, uint256 _toTokenId, uint256 _tokenId, bytes calldata _data) external;

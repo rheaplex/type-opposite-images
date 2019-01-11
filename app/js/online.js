@@ -1,6 +1,10 @@
 let tokensEqualText
 let parentTokenIDs
 
+// Get a list of parent token IDs, slowly in series.
+// We could speed this up with better use of Web3 but it's just 16 tokens that
+// we could hardcode anyway.
+
 const updateParentTokenIDs = async () => {
   let ids = []
   const numParentTokens = await tokensEqualText.totalSupply()
@@ -11,16 +15,33 @@ const updateParentTokenIDs = async () => {
   parentTokenIDs = ids
 }
 
+// If the local storage isn't yet initialized, initialize it.
+// If the blockchain state changed so that the local storage refers to a now
+// non-existent token, default to a token that does exist.
+// This will break if no tokens remain.
+
+const ensureCurrentTokenIDValid = () => {
+  const id = localStorage.getItem('currentTokenID')
+  if ((parentTokenIDs == null) || (parentTokenIDs.findIndex(id) === -1)) {
+    localStorage.setItem('currentTokenID', parentTokenIDs[0])
+  }
+}
+
 const setTokenSelects = async () => {
   $('#token-id-select').remove()
+  const currentToken = currentTokenID()
   parentTokenIDs.forEach((index, value) => {
-    $(`<option value="${value}">${value}</option>`)
+    let selected = ""
+    if (value == currentToken) {
+      selected = " selected"
+    }
+    $(`<option value="${value}"${selected}>${value}</option>`)
       .appendTo($('#token-id-select'))
   })
 }
 
 const currentTokenID = () =>
-      parseInt(localStorage.getItem('currentTokenID') || parentTokenIDs[0])
+      parseInt(localStorage.getItem('currentTokenID'))
 
 const tokenOwnedIDs = async tokenID => {
   let IDs = []
@@ -42,24 +63,53 @@ const tokenOwnedIDs = async tokenID => {
   return IDs
 }
 
-$(document).ready(async () => {
+const childTokenEventHandler = async (err, result) => {
+  if(err) {
+    console.log(err)
+    return
+  }
+  const currentToken = currentTokenID()
+  // We cache child IDs not child contracts, so this would have false
+  // positives in a more complex token environment
+  if (result._childTokenID == curentToken) {
+    updateStrings(currentToken)
+  }
+}
 
-  const TokenEqualsText = TruffleContract('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+$(document).ready(async () => {
+  const json = $.getJSON('../build/contracts/TokensEqualTextERC998.json')
+
+  const TokenEqualsText = TruffleContract(json)
   tokensEqualText = await TokensEqualText.deployed()
 
   await updateTokenIDs()
-  
+  ensureCurrentTokenIDValid()
   await setTokenSelects()
 
-  // Event handler to update display
-  // Event handler to update parentTokenIDs
+  tokenEqualsText.TransferChild().watch(childTokenEventHandler)
+
+  tokenEqualsText.ReceivedChild().watch(childTokenEventHandler)
+
+  // If we were worried about ownership
+  /*
+  // This also catches burns
+
+  tokenEqualsText.Transfer()
+    .watch(async (err, result) => {
+      if(err) {
+        console.log(err)
+        return
+      }
+      await updateTokenIDs()
+      await setTokenSelects()
+      ensureCurrentTokenIDValid()
+      updateStrings(currentTokenID())
+    })
+  */
   
   const parentTokenID = currentTokenID()
 
   updateStrings(parentTokenID)
-  updateSelect(parentTokenID)
-
-  $('#help').fadeOut(8000)
 
   $('#content').click(() => $('#ui').fadeIn())
 
@@ -74,5 +124,7 @@ $(document).ready(async () => {
     updateStrings(currentTokenID())
     $('#ui').fadeOut()
   })
+
+  $('#help').fadeOut(8000)
   
 })
