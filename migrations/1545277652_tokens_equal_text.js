@@ -8,21 +8,21 @@ const aesthetic = require("../aesthetic/aesthetic.js");
 module.exports = (deployer, network, accounts) => {
   deployer.then(async () => {
     const tokensEqualTextERC721 = await deployer.deploy(TokensEqualTextERC721);
-    await tokensEqualTextERC721.mintBatch(aesthetic.FIGURES);
-    await tokensEqualTextERC721.mintBatch(aesthetic.BASES);
-    await tokensEqualTextERC721.mintBatch(aesthetic.BACKDROPS);
-    await tokensEqualTextERC721.mintBatch(aesthetic.GROUNDS);
+    await tokensEqualTextERC721.mintBatch(aesthetic.figures);
+    await tokensEqualTextERC721.mintBatch(aesthetic.bases); // 
+    await tokensEqualTextERC721.mintBatch(aesthetic.backdrops);
+    await tokensEqualTextERC721.mintBatch(aesthetic.grounds);
     const tokensEqualTextERC998 = await deployer.deploy(TokensEqualTextERC998);
-    await tokensEqualTextERC998.mintBatch(aesthetic.FIGURES.length);
-    for(let i = 0; i < aesthetic.FIGURES.length; i++) {
+    await tokensEqualTextERC998.mintBatch(aesthetic.num_tokens);
+    for(let i = 0; i < aesthetic.num_tokens; i++) {
       const erc998ParentToken = i + 1;
       await tokensEqualTextERC721.safeTransferToERC998Batch(
         tokensEqualTextERC998.address,
         erc998ParentToken,
-        [aesthetic.FIGURES[i],
-         aesthetic.BASES[i],
-         aesthetic.BACKDROPS[i],
-         aesthetic.GROUNDS[i]]
+        [aesthetic.figures[i],
+         aesthetic.bases[i],
+         aesthetic.backdrops[i],
+         aesthetic.grounds[i]]
       );
     }
   });
