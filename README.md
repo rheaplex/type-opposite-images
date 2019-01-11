@@ -5,7 +5,7 @@ Token Creation Gas
 ------------------
 
 Bulk NFT token generation is costly. We can create the ERC721 tokens in the
-contract constructor but we run out of gas if the contract implements 
+contract constructor but we run out of gas if the contract implements
 ERC721Enumerable. Creating ERC998 tokens in the constructor is possible for
 at most a couple of tokens before we run out of gas. So constructors are not
 the right location for token creation in this scenario.
