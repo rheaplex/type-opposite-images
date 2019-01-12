@@ -28,7 +28,7 @@ const ensureCurrentTokenIDValid = () => {
 }
 
 const setTokenSelects = async () => {
-  $('#token-id-select').remove()
+  $('#token-id-select').empty()
   const currentToken = currentTokenID()
   parentTokenIDs.forEach((index, value) => {
     let selected = ""

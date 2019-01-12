@@ -192,8 +192,11 @@ for(let i = 0; i < NUM_ITEMS; i++) {
 }
 console.log("*/\n")
 
-console.log('module.exports = {')
+console.log('var aesthetic = {')
 ELEMENTS_NAMES.forEach(name => dump(name, ELEMENTS[name]))
 console.log(`  elements: [ "${ELEMENTS_NAMES.join('", "')}" ],`)
 console.log(`  num_tokens: ${NUM_ITEMS},`)
+console.log("}\n")
+console.log('if (typeof module !== "undefined") {')
+console.log('  module.exports = aesthetic')
 console.log('}')

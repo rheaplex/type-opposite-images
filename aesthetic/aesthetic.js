@@ -32,7 +32,8 @@ desktop pc -- road stretching away -- flat orange sun disk -- ocean waves
 flamingo -- neon pink grid landscape -- heat haze -- black/peach gradient
 cathode ray tube televisions -- console green grid landscape -- sand dunes at night -- starfield
 */
-module.exports = {
+
+var aesthetic = {
   figures: [
     "0x6465736b746f7020706373000000000000000000000000000000000000000000",
     "0x6d69636861656c616e67656c6f27732064617669640000000000000000000000",
@@ -171,4 +172,8 @@ module.exports = {
   ],
   elements: [ "figures", "bases", "backdrops", "grounds" ],
   num_tokens: 32,
+}
+
+if (typeof module !== "undefined") {
+  module.exports = aesthetic
 }
