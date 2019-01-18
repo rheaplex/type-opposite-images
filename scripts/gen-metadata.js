@@ -1,11 +1,6 @@
 const fs = require('fs')
 const process = require('process')
 
-if (! process.cwd().endsWith('tokens-equal-text')) {
-  console.log('Make sure to run this in tokens-equal-text')
-  process.exit(1)
-}
-
 const NUM_TOKENS = 32;
 const TOKEN_BASE = 1;
 

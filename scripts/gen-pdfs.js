@@ -24,12 +24,10 @@ pm2 start chromium \
   --remote-debugging-port=9222
 */
 
-
 const crypto = require('crypto')
-//const pdf = require('html-pdf')
 const htmlPdf = require('html-pdf-chrome');
 
-const aesthetic = require('./aesthetic/aesthetic.js')
+const aesthetic = require('../aesthetic/aesthetic.js')
 
 const options = {
   port: 9222, // port Chrome is listening on
@@ -48,19 +46,18 @@ const hexToString = hex => {
   return str
 }
 
-// Copy and paste antipattern
-
-const hexToColour = hex => {
+const strToColour = str => {
   const hash = crypto.createHash('sha256')
-  hash.update(hex)
-  return `#${hash.digest('hex').substr(0,6)}`
+  hash.update(str)
+  return '#' + hash.digest('hex').substr(0,6)
 }
 
 for(let i = 0; i < aesthetic.num_tokens; i++) {
   let lines = aesthetic.elements.map(element => {
-    const item = aesthetic[element][i]
-    const colour = hexToColour(item)
+    // Get element, strip leading '0x'
+    const item = aesthetic[element][i].substr(2)
     const text = hexToString(item)
+    const colour = strToColour(text)
     return `<div class="text" style="color: ${colour};">${text}</div>`
   }).join("\n")
   // Copy and paste antipattern

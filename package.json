@@ -7,7 +7,11 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "aesthetic": "node scripts/gen-aesthetic.js",
+    "metadata": "node scripts/gen-metadata.js",
+    "pdfs" : "node scripts/gen-pdfs.js",
+    "pngs" : "mogrify -density 160 -format png -quality 90 -gravity Center -crop 60%\\!  -path ./metadata/ ./metadata/1.png ./pdfs/*"
   },
   "keywords": [],
   "author": "",
