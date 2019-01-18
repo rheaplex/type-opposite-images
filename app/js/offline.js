@@ -1,7 +1,7 @@
 const tokenOwnedIDs = tokenID =>
       aesthetic
       .elements
-      .map(element => aesthetic[element][tokenID])
+      .map(element => aesthetic[element][tokenID].substr(2))
 
 const currentTokenID = () =>
       parseInt(localStorage.getItem('currentTokenID') || 1) - 1

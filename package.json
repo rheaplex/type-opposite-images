@@ -10,14 +10,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "aesthetic": "node scripts/gen-aesthetic.js",
     "metadata": "node scripts/gen-metadata.js",
-    "pdfs" : "node scripts/gen-pdfs.js",
-    "pngs" : "mogrify -density 160 -format png -quality 90 -gravity Center -crop 60%\\!  -path ./metadata/ ./metadata/1.png ./pdfs/*"
+    "pdfs": "node scripts/gen-pdfs.js",
+    "pngs": "mogrify -density 160 -format png -quality 90 -gravity Center -crop 60%\\!  -path ./metadata/ ./metadata/1.png ./pdfs/*",
+    "gen": "npm run metadata && npm run pdfs && npm run pngs"
   },
   "keywords": [],
   "author": "",
   "license": "GPL-v3-or-later",
   "dependencies": {
     "html-pdf-chrome": "^0.5.0",
-    "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-solidity#release-v2.1.0-solc-0.5"
+    "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-solidity#release-v2.1.0-solc-0.5",
+    "wkhtmltopdf": "^0.3.4"
   }
 }

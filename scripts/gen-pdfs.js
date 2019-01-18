@@ -25,7 +25,10 @@ pm2 start chromium \
 */
 
 const crypto = require('crypto')
-const htmlPdf = require('html-pdf-chrome');
+//const htmlPdf = require('html-pdf-chrome');
+
+// Make sure to have the very latest wkhtmltopdf installed
+const wkhtmltopdf = require('wkhtmltopdf')
 
 const aesthetic = require('../aesthetic/aesthetic.js')
 
@@ -41,7 +44,13 @@ const options = {
 const hexToString = hex => {
   let str = ''
   for (let i = 0; i < hex.length; i += 2) {
-	str += String.fromCharCode(parseInt(hex.substr(i, 2), 16))
+    let a = String.fromCharCode(parseInt(hex.substr(i, 2), 16))
+    // Avoid trailing nulls, these break `` apart from anything else
+    // We could also have used the first null pos as the loop boundary
+    if (a === "\0") {
+      break
+    }
+	str += a
   }
   return str
 }
@@ -57,11 +66,77 @@ for(let i = 0; i < aesthetic.num_tokens; i++) {
     // Get element, strip leading '0x'
     const item = aesthetic[element][i].substr(2)
     const text = hexToString(item)
-    const colour = strToColour(text)
-    return `<div class="text" style="color: ${colour};">${text}</div>`
+    const colour = strToColour(item)
+    return `      <div class="text" style="color: ${colour};">${text}</div>`
   }).join("\n")
   // Copy and paste antipattern
-  const html = `<!doctype html>
+  const html =
+        // wkhtmltopdf version. Dated html but much better colours.
+        `<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Tokens Equal Text ${i + 1}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      html {
+        line-height: 1.15;
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      #wrapper {
+        display: table;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #content {
+        display: table-cell;
+        text-align: center; 
+        vertical-align: middle;
+       }
+
+      #texts {
+        display: inline-block;
+        text-align: left; 
+      }
+
+      .text {
+        font-family: 'Old Standard TT', serif;
+        font-weight: 700;
+        font-style: normal;
+        font-size: 32px;
+        letter-spacing: -0.075em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=Old+Standard+TT:400,700" rel="stylesheet"> 
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="content">
+        <div id="texts">
+${lines}
+        </div>
+      </div>
+    </div>  
+  </body>
+</html>
+`
+        // html-pdf-chrome version
+        /*`<!doctype html>
 <html class="no-js" lang="">
 <head>
   <meta charset="utf-8">
@@ -105,10 +180,18 @@ body {
 </head>
 <body>
    <div id="content">
-     <div id="texts">${lines}</div>
+     <div id="texts">
+${lines}
+     </div>
    </div>  
 </body>
 </html>`
+*/
   //console.log(html)
-  htmlPdf.create(html, options).then(pdf => pdf.toFile(`./pdfs/${i + 1}.pdf`))
+  //htmlPdf.create(html, options).then(pdf => pdf.toFile(`./pdfs/${i + 1}.pdf`))
+  wkhtmltopdf(html, {
+    pageSize: 'letter',
+    orientation: 'landscape',
+    output: `./pdfs/${i + 1}.pdf`,
+  })
 }
