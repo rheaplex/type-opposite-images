@@ -26,7 +26,7 @@ const updateSelect = (parentTokenID) => {
 }
 
 const updateStrings = async (parentTokenID) => {
-  const ids = tokenOwnedIDs(parentTokenID)
+  const ids = await tokenOwnedIDs(parentTokenID)
   const strings = idsToStrings(ids)
   const colours = await Promise.all(idsToColours(ids))
   $('.text').remove()

@@ -158,14 +158,41 @@ contract('TokensEqualTextERC998', async accounts => {
   it("token URLs are correct", async () => {
     const erc998 = await TokensEqualTextERC998.deployed();
     const uri = await erc998.tokenURI(3);
-    assert.equal(uri, "https://robmyers.org/tokens-equal-text/3")
+    assert.equal(uri, "https://robmyers.org/tokens-equal-text/3");
   });
 
   it("token URLs can be updated", async () => {
     const erc998 = await TokensEqualTextERC998.deployed();
     await erc998.updateTokenURIBase("aaa://newurl/");
     const uri = await erc998.tokenURI(3);
-    assert.equal(uri, "aaa://newurl/3")
+    assert.equal(uri, "aaa://newurl/3");
   });
 
+  it("ERC721 Enumeration interface: correct count of tokens", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    const total = await erc998.totalSupply();
+    assert.equal(total.toNumber(), aesthetic.num_tokens);
+  });
+
+  it("ERC721 Enumeration interface: correct token by index", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    for (let i = 0; i < aesthetic.num_tokens; i++) {
+      const id = await erc998.tokenByIndex(i);
+      // This is how we calculate the IDs internally, naughty detail exposing
+      assert.equal(id.toNumber(), i + 1);
+    }
+  });
+
+  it("ERC721 Enumeration interface: correct owner token by index", async () => {
+    const erc998 = await TokensEqualTextERC998.deployed();
+    let balance = await erc998.balanceOf(accounts[2]);
+    for (let i = 0; i < balance; i++) {
+      const id = await erc998.tokenOfOwnerByIndex(accounts[2], i);
+      // This is how we calculate the IDs internally, naughty detail exposing
+      //assert.equal(id.toNumber(), i + 1);
+      console.log(id.toNumber())
+    }
+  });
+  
+  
 });

@@ -2,15 +2,16 @@ let tokensEqualText
 let parentTokenIDs
 
 // Get a list of parent token IDs, slowly in series.
-// We could speed this up with better use of Web3 but it's just 16 tokens that
-// we could hardcode anyway.
+// We could speed this up with better use of Web3 and promise handling
+// but it's just 16 tokens that  we could hardcode anyway.
 
 const updateParentTokenIDs = async () => {
   let ids = []
-  const numParentTokens = await tokensEqualText.totalSupply()
+  const supply = await tokensEqualText.totalSupply()
+  const numParentTokens = web3.toDecimal(await tokensEqualText.totalSupply())
   for (let i = 0; i < numParentTokens; i++) {
-    const childTokenID = await tokensEqualText.tokenByIndex(i)
-    ids.append(childTokenID.toString(10))
+    const tokenID = await tokensEqualText.tokenByIndex(i)
+    ids.push(tokenID.toString(10))
   }
   parentTokenIDs = ids
 }
@@ -22,7 +23,8 @@ const updateParentTokenIDs = async () => {
 
 const ensureCurrentTokenIDValid = () => {
   const id = localStorage.getItem('currentTokenID')
-  if ((parentTokenIDs == null) || (parentTokenIDs.findIndex(id) === -1)) {
+  if ((parentTokenIDs == null)
+      || (parentTokenIDs.findIndex(i => i == id) === -1)) {
     localStorage.setItem('currentTokenID', parentTokenIDs[0])
   }
 }
@@ -30,7 +32,7 @@ const ensureCurrentTokenIDValid = () => {
 const setTokenSelects = async () => {
   $('#token-id-select').empty()
   const currentToken = currentTokenID()
-  parentTokenIDs.forEach((index, value) => {
+  parentTokenIDs.forEach(value => {
     let selected = ""
     if (value == currentToken) {
       selected = " selected"
@@ -46,18 +48,18 @@ const currentTokenID = () =>
 const tokenOwnedIDs = async tokenID => {
   let IDs = []
   // Get children of ID from contract
-  const childContractCount = await tokensEqualText.totalChildContracts()
+  const childContractCount = await tokensEqualText.totalChildContracts(tokenID)
   for(let i = 0; i < childContractCount; i++) {
-    const childContract = await tokensEqualText.childContractByIndex()
+    const childContract = await tokensEqualText.childContractByIndex(tokenID, i)
     const childTokenCount
           = await tokensEqualText.totalChildTokens(tokenID, childContract)
     for(let j = 0; j < childTokenCount; j++) {
-      const childID = await tokensEqualText.childTokenByIndex(tokenId,
+      const childID = await tokensEqualText.childTokenByIndex(tokenID,
                                                               childContract,
                                                               j)
       // These may not be unique but that's not a problem, we are using them
       // as content not identifiers
-      IDs.append(childID.toString(16))
+      IDs.push(childID.toString(16))
     }
   }
   return IDs
@@ -77,24 +79,30 @@ const childTokenEventHandler = async (err, result) => {
 }
 
 $(document).ready(async () => {
-  const json = $.getJSON('../build/contracts/TokensEqualTextERC998.json')
+  const json = await $.getJSON('../build/contracts/TokensEqualTextERC998.json')
 
-  const TokenEqualsText = TruffleContract(json)
+  if (typeof web3 !== 'undefined') {
+    web3 = new Web3(web3.currentProvider)
+  } else {
+    // Set the provider you want from Web3.providers
+    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+  }
+  const TokensEqualText = TruffleContract(json)
+  TokensEqualText.setProvider(web3.currentProvider)
   tokensEqualText = await TokensEqualText.deployed()
-
-  await updateTokenIDs()
+  await updateParentTokenIDs()
   ensureCurrentTokenIDValid()
   await setTokenSelects()
+  
+  //tokensEqualText.TransferChild().watch(childTokenEventHandler)
 
-  tokenEqualsText.TransferChild().watch(childTokenEventHandler)
-
-  tokenEqualsText.ReceivedChild().watch(childTokenEventHandler)
+  //tokensEqualText.ReceivedChild().watch(childTokenEventHandler)
 
   // If we were worried about ownership
   /*
   // This also catches burns
 
-  tokenEqualsText.Transfer()
+  tokensEqualText.Transfer()
     .watch(async (err, result) => {
       if(err) {
         console.log(err)
@@ -108,7 +116,6 @@ $(document).ready(async () => {
   */
   
   const parentTokenID = currentTokenID()
-
   updateStrings(parentTokenID)
 
   $('#content').click(() => $('#ui').fadeIn())

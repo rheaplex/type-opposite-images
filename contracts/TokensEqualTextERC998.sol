@@ -1,19 +1,41 @@
 /**********************************
-// Based in large part on ERC998: V
-/* Author: Nick Mudge, <nick@perfectabstractions.com>, https://medium.com/@mudgen.
+/* Original author: Nick Mudge, <nick@perfectabstractions.com>, https://medium.com/@mudgen.
+// Modifications: Rhea Myers <rhea@myers.studio>
 /**********************************/
+
+
+/*
+  Notes:
+
+  We generate our ERC721 tokens with IDs starting at 1 and proceding
+  sequentially. Therefore for all tokens ID = index + 1. This is so 0 can
+  be an invalid token reference.
+
+  We mint only a few (32) tokens, and we do so during migration.
+
+  We have a single URL root for all tokens as we control their metadata.
+
+  We rely on these facts in a couple of places to take shortcuts that we would
+  not in code that was designed to handle more, more arbitrarily minted tokens.
+
+  Where an Interface rather than an Implementation from OpenZeppelin is used,
+  this is usually so we can take those shortcuts and save storage & gas.
+ */
+
 
 //jshint ignore: start
 
 pragma solidity ^0.5.0;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol";
+
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721Enumerable.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721Metadata.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721Receiver.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import './Strings.sol';
+import "./Strings.sol";
 
 
 interface ERC998ERC721TopDown {
@@ -48,7 +70,9 @@ interface ERC998ERC721BottomUp {
 
 
 contract TokensEqualTextERC998 is
-ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
+    ERC721, IERC721Metadata,
+    ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable,
+    Ownable
 {
     // return this.rootOwnerOf.selector ^ this.rootOwnerOfChild.selector ^
     //   this.tokenOwnerOf.selector ^ this.ownerOfChild.selector;
@@ -67,7 +91,7 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
 
     // token owner => (operator address => bool)
     mapping(address => mapping(address => bool)) internal tokenOwnerToOperators;
-
+    
     //from zepellin ERC721Receiver.sol
     //old version
     bytes4 constant ERC721_RECEIVED_OLD = 0xf0b9e5ba;
@@ -424,11 +448,11 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
     //------------------------------------------------------------
     // ERC721 Metadata interface
 
-    function name() external pure returns (string memory) {
+    function name() external view returns (string memory) {
         return "Tokens Equal Text ERC-998";
     }
 
-    function symbol() external pure returns (string memory) {
+    function symbol() external view returns (string memory) {
         return "TET998";
     }
 
@@ -446,17 +470,49 @@ ERC721, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable, Ownable
     }
 
     //------------------------------------------------------------
+    // ERC721 Enumerable interface
 
-    // wrapper on minting new 721
-    // NO MINTING outside of initial batch minting
-    function _mint(address _to) private returns (uint256) {
-        tokenCount++;
-        uint256 tokenCount_ = tokenCount;
-        tokenIdToTokenOwner[tokenCount_] = _to;
-        tokenOwnerToTokenCount[_to]++;
-        return tokenCount_;
+    function totalSupply() public view returns (uint256) {
+        return tokenCount;
     }
 
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        public view
+        returns (uint256 tokenId)
+    {
+        require(index < balanceOf(owner));
+        // Avoid maintaining an array for each address, because there are only
+        // 32 tokens and this is cheaper than updating arrays.
+        uint256 matches = 0;
+        // Remember that token IDs start at 1, and are successive small ints
+        for(uint256 i = 1; i <= tokenCount; i++) {
+            if(ownerOf(i) == owner) {
+                if (matches == index) {
+                    tokenId = i;
+                } else {
+                    matches++;
+                }
+            }
+        }
+    }
+    
+    function tokenByIndex(uint256 index) public pure returns (uint256) {
+        // We generate the IDs like this, so just do the same here and
+        // don't use storage we don't have to
+        return index + 1;
+    }
+    
+    //------------------------------------------------------------
+
+    // wrapper on minting new 721
+    function _mint(address _to) private returns (uint256) {
+        tokenCount++;
+        tokenIdToTokenOwner[tokenCount] = _to;
+        tokenOwnerToTokenCount[_to]++;
+        return tokenCount;
+    }
+
+    // We should make this a one-time callable
     function mintBatch(uint256 _count) onlyOwner public {
         for(uint256 i = 0; i < _count; i++) {
             // msg.sender will be owner, saving a call to owner()

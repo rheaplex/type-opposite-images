@@ -449,7 +449,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.0",
-  "updatedAt": "2018-12-29T00:41:46.909Z",
+  "updatedAt": "2019-01-20T00:09:17.640Z",
   "devdoc": {
     "details": "Note: the ERC-165 identifier for this interface is 0x150b7a02.",
     "methods": {

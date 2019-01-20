@@ -3,13 +3,11 @@ const TokensEqualTextERC998 = artifacts.require("./TokensEqualTextERC998.sol");
 
 const aesthetic = require("../aesthetic/aesthetic.js");
 
-//FIXME: check that token lists are same lengths!
-
 module.exports = (deployer, network, accounts) => {
   deployer.then(async () => {
     const tokensEqualTextERC721 = await deployer.deploy(TokensEqualTextERC721);
     await tokensEqualTextERC721.mintBatch(aesthetic.figures);
-    await tokensEqualTextERC721.mintBatch(aesthetic.bases); // 
+    await tokensEqualTextERC721.mintBatch(aesthetic.bases);
     await tokensEqualTextERC721.mintBatch(aesthetic.backdrops);
     await tokensEqualTextERC721.mintBatch(aesthetic.grounds);
     const tokensEqualTextERC998 = await deployer.deploy(TokensEqualTextERC998);
