@@ -50,7 +50,7 @@ module.exports = {
        host: "127.0.0.1",     // Localhost (default: none)
        port: 9545,            // Standard Ethereum port (default: none)
        network_id: "*",       // Any network (default: none)
-       gas: 8000000,           // Gas sent with each transaction (default: ~6700000)
+       gas: 6700000,           // Gas sent with each transaction (default: ~6700000)
      },
 
     // Useful for deploying to a public network.
@@ -70,7 +70,7 @@ module.exports = {
       port: 8545,
       network_id: 1,
       gas: 8500000,
-      gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
+      gasPrice: 5000000000,  // 5 gwei (in wei) (default: 100 gwei)
       // from: <address>,        // Account to send txs from (default: accounts[0])
       // websockets: true        // Enable EventEmitter interface for web3 (default: false)
     },
@@ -86,6 +86,11 @@ module.exports = {
   // Set default mocha options here, use special reporters etc.
   mocha: {
     // timeout: 100000
+    reporter: 'eth-gas-reporter',
+    reporterOptions : {
+      currency: 'USD',
+      gasPrice: 5
+    }
   },
 
   // Configure your compilers
