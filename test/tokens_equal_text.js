@@ -158,7 +158,7 @@ contract('TokensEqualTextERC998', async accounts => {
   it("token URLs are correct", async () => {
     const erc998 = await TokensEqualTextERC998.deployed();
     const uri = await erc998.tokenURI(3);
-    assert.equal(uri, "https://robmyers.org/tokens-equal-text/3");
+    assert.equal(uri, "https://show.robmyers.org/tokens-equal-text/metadata/3");
   });
 
   it("token URLs can be updated", async () => {
@@ -189,10 +189,8 @@ contract('TokensEqualTextERC998', async accounts => {
     for (let i = 0; i < balance; i++) {
       const id = await erc998.tokenOfOwnerByIndex(accounts[2], i);
       // This is how we calculate the IDs internally, naughty detail exposing
-      //assert.equal(id.toNumber(), i + 1);
-      console.log(id.toNumber())
+      assert.equal(id.toNumber(), i + 1);
     }
   });
-  
-  
+
 });
