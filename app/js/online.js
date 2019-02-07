@@ -78,7 +78,25 @@ const childTokenEventHandler = async (err, result) => {
   }
 }
 
+const maybeSetTokenFromHash = () => {
+  let status = true
+  const tokenFromURLHash = new URL(document.location).hash.substr(1)
+  if (tokenFromURLHash !== "") {
+    const tokenNum = parseInt(tokenFromURLHash, 10)
+    if ((tokenNum < 1)
+        || (tokenNum >= parentTokenIDs.length)) {
+      $('#help').text('No such token.')
+      status = false
+    } else {
+      localStorage.setItem('currentTokenID', tokenFromURLHash)
+    }
+  }
+  return status
+}
+
 $(document).ready(async () => {
+  const helpText = $('#help').text()
+  $('#help').text('Loading resources from Ethereum.')
   const json = await $.getJSON('../build/contracts/TokensEqualTextERC998.json')
 
   if (typeof web3 !== 'undefined') {
@@ -90,10 +108,16 @@ $(document).ready(async () => {
   const TokensEqualText = TruffleContract(json)
   TokensEqualText.setProvider(web3.currentProvider)
   tokensEqualText = await TokensEqualText.deployed()
+
   await updateParentTokenIDs()
+  $('#help').text(helpText)
+  let ok = maybeSetTokenFromHash()
+  if (! ok) {
+    return
+  }
   ensureCurrentTokenIDValid()
   await setTokenSelects()
-  
+
   //tokensEqualText.TransferChild().watch(childTokenEventHandler)
 
   //tokensEqualText.ReceivedChild().watch(childTokenEventHandler)
@@ -114,7 +138,7 @@ $(document).ready(async () => {
       updateStrings(currentTokenID())
     })
   */
-  
+
   const parentTokenID = currentTokenID()
   updateStrings(parentTokenID)
 
@@ -133,5 +157,5 @@ $(document).ready(async () => {
   })
 
   $('#help').fadeOut(8000)
-  
+
 })

@@ -13,9 +13,9 @@ const updateGas = async function(what, receipt, deployer) {
   extraGas = extraGas.add(gasAmount);
   extraGasCost = extraGasCost.add(gasCost);
   deployer.logger.log("   > " + what
-                      + ": gas: " + gasAmount
-                      + " price(gwei): " + web3.utils.fromWei(gasPrice, 'gwei')
-                      + " cost(eth): " + web3.utils.fromWei(gasCost, 'ether'))
+                      + ":  gas: " + gasAmount
+                      + "  price(gwei): " + web3.utils.fromWei(gasPrice, 'gwei')
+                      + "  cost(eth): " + web3.utils.fromWei(gasCost, 'ether'))
 }
 
 const reportExtraGas = (deployer) => {

@@ -103,13 +103,13 @@ for(let i = 0; i < aesthetic.num_tokens; i++) {
 
       #content {
         display: table-cell;
-        text-align: center; 
+        text-align: center;
         vertical-align: middle;
        }
 
       #texts {
         display: inline-block;
-        text-align: left; 
+        text-align: left;
       }
 
       .text {
@@ -131,7 +131,7 @@ for(let i = 0; i < aesthetic.num_tokens; i++) {
 ${lines}
         </div>
       </div>
-    </div>  
+    </div>
   </body>
 </html>
 `
@@ -183,7 +183,7 @@ body {
      <div id="texts">
 ${lines}
      </div>
-   </div>  
+   </div>
 </body>
 </html>`
 */

@@ -91,7 +91,7 @@ contract TokensEqualTextERC998 is
 
     // token owner => (operator address => bool)
     mapping(address => mapping(address => bool)) internal tokenOwnerToOperators;
-    
+
     //from zepellin ERC721Receiver.sol
     //old version
     bytes4 constant ERC721_RECEIVED_OLD = 0xf0b9e5ba;
@@ -456,7 +456,8 @@ contract TokensEqualTextERC998 is
         return "TET998";
     }
 
-    string private tokenURIBase = "https://robmyers.org/tokens-equal-text/";
+    string private tokenURIBase
+        = "https://show.robmyers.org/tokens-equal-text/metadata/";
 
     function updateTokenURIBase(string calldata _newBase) onlyOwner external {
         tokenURIBase = _newBase;
@@ -495,13 +496,13 @@ contract TokensEqualTextERC998 is
             }
         }
     }
-    
+
     function tokenByIndex(uint256 index) public pure returns (uint256) {
         // We generate the IDs like this, so just do the same here and
         // don't use storage we don't have to
         return index + 1;
     }
-    
+
     //------------------------------------------------------------
 
     // wrapper on minting new 721
