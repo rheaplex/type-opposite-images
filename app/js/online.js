@@ -84,7 +84,7 @@ const maybeSetTokenFromHash = () => {
   if (tokenFromURLHash !== "") {
     const tokenNum = parseInt(tokenFromURLHash, 10)
     if ((tokenNum < 1)
-        || (tokenNum >= parentTokenIDs.length)) {
+        || (tokenNum > parentTokenIDs.length)) {
       $('#help').text('No such token.')
       status = false
     } else {
