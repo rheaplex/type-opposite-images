@@ -8,32 +8,19 @@ module.exports = function(deployer, network, accounts) {
   extraGas.init(web3)
   deployer.then(async () => {
     const tokensEqualTextERC721 = await TokensEqualTextERC721.deployed();
-    const numExisting = await tokensEqualTextERC721.balanceOf(accounts[0]);
-    let receipt;
     // We do not update transaction state for each batch, but we do
     // want to use the transaction system to store whether all batches have
     // been created. This saves on wasted gas if we have to restart the
     // migration.
-    // So we check for whether each batch has been created (which is atomic on
-    // the blockchain) and skip it if it has.
-    if (numExisting.eq(web3.utils.toBN(0))) {
-      receipt = await tokensEqualTextERC721.mintBatch(aesthetic.figures);
-      await extraGas.update("minting figures  ", receipt, deployer, web3);
-    }
-    if (numExisting.lt(web3.utils.toBN(aesthetic.figures.length))) {
-      receipt = await tokensEqualTextERC721.mintBatch(aesthetic.bases);
-      await extraGas.update("minting bases    ", receipt, deployer, web3);
-    }
-    if (numExisting.lt(web3.utils.toBN(aesthetic.figures.length
-                                       + aesthetic.bases.length))) {
-      receipt = await tokensEqualTextERC721.mintBatch(aesthetic.backdrops);
-      await extraGas.update("minting backdrops", receipt, deployer, web3);
-    }
-    if (numExisting.lt(web3.utils.toBN(aesthetic.figures.length
-                                       + aesthetic.bases.length
-                                       + aesthetic.backdrops.length))) {
-      receipt = await tokensEqualTextERC721.mintBatch(aesthetic.grounds);
-      await extraGas.update("minting grounds  ", receipt, deployer, web3);
+    // So we skip any created batches, assuming the number of tokens hasn't
+    // changed (it shouldn't during migration!) and that batch creation is
+    // atomic (which it is as a transaction).
+    const numExisting = await tokensEqualTextERC721.balanceOf(accounts[0]);
+    let i = Math.floor(numExisting.toNumber() / aesthetic.num_tokens);
+    for(; i < aesthetic.elements.length; i++) {
+      const element = aesthetic.elements[i];
+      const receipt = await tokensEqualTextERC721.mintBatch(aesthetic[element]);
+      await extraGas.update(`minting ${element}  `, receipt, deployer, web3);
     }
   });
 };
