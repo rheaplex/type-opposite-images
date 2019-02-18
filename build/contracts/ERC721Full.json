@@ -959,7 +959,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-02-06T06:22:46.955Z",
+  "updatedAt": "2019-02-18T03:20:29.999Z",
   "devdoc": {
     "details": "see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md",
     "methods": {

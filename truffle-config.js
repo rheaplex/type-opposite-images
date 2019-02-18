@@ -24,9 +24,6 @@
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
 
-const fs = require("fs");
-const secrets = JSON.parse(fs.readFileSync(".secrets"));
-
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -53,7 +50,7 @@ module.exports = {
      },
 
     rinkeby: {
-      provider: () => new HDWalletProvider(secrets.infuraRinkebyMnemonic, `https://rinkeby.infura.io/v3/${secrets.infuraRinkebyProjectID}`),
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://rinkeby.infura.io/v3/${process.env.INFURA_RINKEBY_PROJECT_ID}`),
       network_id: 4,        // Rinkeby's id
       //gasPrice: 5000000000, // 5 Gwei
       gas: 5500000,         // Otherwise we crash during the migration dry-run with an EVM error
@@ -63,7 +60,8 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
      ropsten: {
-       // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraKey}`),
+       // provider: () => new HDWalletProvider(process.env.MNEMONIC,
+       //                                      `https://ropsten.infura.io/${process.env.INFURA_KEY}`),
        host: "127.0.0.1",
        port: 8555,
        network_id: 3,       // Ropsten's id
@@ -74,13 +72,18 @@ module.exports = {
      },
 
     mainnet: {
-      port: 8545,
+      //provider: () => new HDWalletProvider(process.env.MNEMONIC,
+      //                                     "http://127.0.0.1:8545",
+      //                                     process.env.ADDRESS_INDEX || 0),
+      provider: () => new HDWalletProvider(process.env.MNEMONIC,
+                                           `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+                                           process.env.ADDRESS_INDEX || 0),
+      //host: "127.0.0.1",
+      //port: 8545,
       network_id: 1,
-      gas: 8500000,
-      gasPrice: 5000000000,  // 5 gwei (in wei) (default: 100 gwei)
-      from: "0xf7030414D53B4D4ecA8b1d2F1E7146DF9c78e467",        // Account to send txs from (default: accounts[0])
+      gas: 6700000,
+      gasPrice: 10000000000,  // 10 gwei (in wei) (default: 100 gwei)
       // websockets: true,        // Enable EventEmitter interface for web3 (default: false)
-      gasPrice: 5000000000, // 5 gwei (in wei) (default: 100 gwei)
       timeoutBlocks: 200,   // # of blocks before a deployment times out  (minimum/default: 50)
     },
 
