@@ -1,5 +1,5 @@
 {
-  "name": "tokens-equal-text",
+  "name": "type-opposite-images",
   "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
@@ -15,7 +15,7 @@
     "gen": "npm run metadata && npm run pdfs && npm run pngs"
   },
   "keywords": [],
-  "author": "",
+  "author": "Rhea Myers",
   "license": "GPL-v3-or-later",
   "dependencies": {
     "truffle-hdwallet-provider": "^1.0.0-web3one.5"

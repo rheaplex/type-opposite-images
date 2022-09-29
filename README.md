@@ -18,8 +18,3 @@ For the amount of tokens that needed creating and composing for this project
 the correct solution turned out to be adding access controlled batch token
 creation functions to the ERC721 and ERC998 contracts and creating and
 attaching the tokens (in batches) during migration.
-
-Random Note
------------
-
-Ambroise Std Francois Demi is a nice font.
