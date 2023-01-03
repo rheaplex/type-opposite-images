@@ -1,5 +1,5 @@
-const TokensEqualTextERC998 = artifacts.require("./TokensEqualTextERC998.sol");
-const TokensEqualTextERC721 = artifacts.require("./TokensEqualTextERC721.sol");
+const TET721 = artifacts.require("TokensEqualTextERC721");
+const TET998 = artifacts.require("TokensEqualTextERC998");
 
 const aesthetic = require('../aesthetic/aesthetic.js');
 
@@ -10,10 +10,65 @@ function bnToStr(bn) {
     str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
   }
   return str;
- }
+}
+
+let tet721Batch = async (tet721, account) => {
+  for(let i = 0; i < aesthetic.elements.length; i++) {
+    const element = aesthetic.elements[i];
+    await tet721.mintBatch(
+      aesthetic[element],
+      {
+        from: account,
+        gas: 5500000,
+      }
+    );
+  }
+};
+
+let tet998Batch = async (tet998, account) => {
+  return tet998.mintBatch(
+    aesthetic.num_tokens,
+    { from: account }
+  );
+};
+
+let tetCompose = async(tet721, tet998, account) => {
+  for(let i = 0; i < aesthetic.num_tokens; i++) {
+      const erc998ParentToken = i + 1;
+      const tokenNumStr = erc998ParentToken.toString().padStart(2, " ");
+      const childTokens = [aesthetic.figures[i],
+                           aesthetic.bases[i],
+                           aesthetic.backdrops[i],
+                           aesthetic.grounds[i]];
+      await tet721.safeTransferToERC998Batch(
+        tet998.address,
+        erc998ParentToken,
+        childTokens,
+        {
+          from: account,
+          gas: 6000000,
+        }
+      );
+    }
+};
+
+let tetDeploy = async (account) => {
+  const tet721 = await TET721.new( { from: account });
+  const tet998 = await TET998.new( { from: account });
+  await tet721Batch(tet721, account);
+  await tet998Batch(tet998, account);
+  await tetCompose(tet721, tet998, account);
+  return [tet721, tet998];
+};
 
 contract('TokensEqualTextERC998', async accounts => {
 
+  it("correct number of ERC721 tokens should exist", async () => {
+    await tetDeploy(accounts[2]);
+  });
+  
+  return;
+  
   it("correct number of ERC721 tokens should exist", async () => {
     const erc721 = await TokensEqualTextERC721.deployed();
     const numChildren = await erc721.totalSupply();

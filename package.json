@@ -7,7 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "truffle test",
+    "lintjs": "npx eslint app/js/offline.js app/js/online.js app/js/shared.js migrations/* test/*.js",
+    "lintsol": "solium -d contracts",
     "aesthetic": "node scripts/gen-aesthetic.js",
     "metadata": "node scripts/gen-metadata.js",
     "pdfs": "node scripts/gen-pdfs.js",
@@ -18,14 +20,14 @@
   "author": "Rhea Myers",
   "license": "GPL-v3-or-later",
   "dependencies": {
-    "truffle-hdwallet-provider": "^1.0.0-web3one.5"
+    "@truffle/hdwallet-provider": "^2.1.4"
   },
   "devDependencies": {
     "any-promise": "^1.3.0",
     "bindings": "^1.4.0",
-    "eth-gas-reporter": "^0.1.12",
     "ipfs-http-client": "^29.1.0",
-    "openzeppelin-solidity": "^2.1",
-    "wkhtmltopdf": "^0.3.4"
+    "wkhtmltopdf": "^0.3.4",
+    "@openzeppelin/contracts": "^4.7.3",
+    "eslint": "^8.31.0"
   }
 }
