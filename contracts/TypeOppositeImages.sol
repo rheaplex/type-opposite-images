@@ -51,7 +51,6 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
         }
         return reversed;
     }
-
     
     function tet998TokenChildCount(uint256 tokenId)
         public
@@ -120,6 +119,19 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
         }
     }
 
+    function aestheticToCitehtsea(uint256 tokenId)
+        public
+        view
+        returns (bytes32[] memory reversals)
+    {
+        uint256[] memory tetChildIds = tet998TokenChildIds(tokenId);
+        reversals = new bytes32[](tetChildIds.length);
+        for(uint256 i = 0; i < tetChildIds.length; i++) {
+            reversals[i] = citehtsea[tetChildIds[i]];
+        }
+        return reversals;
+    }
+    
     function setTet998Addr(address tet998Addr)
         public
         onlyOwner
