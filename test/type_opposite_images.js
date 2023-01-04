@@ -1,251 +1,61 @@
 const TET721 = artifacts.require("TokensEqualTextERC721");
 const TET998 = artifacts.require("TokensEqualTextERC998");
+const TOI = artifacts.require("TypeOppositeImages");
 
 const aesthetic = require('../aesthetic/aesthetic.js');
 
-function bnToStr(bn) {
-  let hex = bn.toString(16);
-  let str = '0x';
-  for (let i = 0; i < hex.length; i += 2) {
-    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  }
-  return str;
-}
+const NUM_TOKENS = 32;
 
-let tet721Batch = async (tet721, account) => {
-  for(let i = 0; i < aesthetic.elements.length; i++) {
-    const element = aesthetic.elements[i];
-    await tet721.mintBatch(
-      aesthetic[element],
-      {
-        from: account,
-        gas: 5500000,
-      }
-    );
-  }
-};
-
-let tet998Batch = async (tet998, account) => {
-  return tet998.mintBatch(
-    aesthetic.num_tokens,
-    { from: account }
-  );
-};
-
-let tetCompose = async(tet721, tet998, account) => {
-  for(let i = 0; i < aesthetic.num_tokens; i++) {
-      const erc998ParentToken = i + 1;
-      const tokenNumStr = erc998ParentToken.toString().padStart(2, " ");
-      const childTokens = [aesthetic.figures[i],
-                           aesthetic.bases[i],
-                           aesthetic.backdrops[i],
-                           aesthetic.grounds[i]];
-      await tet721.safeTransferToERC998Batch(
-        tet998.address,
-        erc998ParentToken,
-        childTokens,
-        {
-          from: account,
-          gas: 6000000,
-        }
-      );
-    }
-};
-
-let tetDeploy = async (account) => {
-  const tet721 = await TET721.new( { from: account });
-  const tet998 = await TET998.new( { from: account });
-  await tet721Batch(tet721, account);
-  await tet998Batch(tet998, account);
-  await tetCompose(tet721, tet998, account);
-  return [tet721, tet998];
-};
+const CITEHTSEA = require("../aesthetic/citehtsea.js");
+const CITEHTSEA_KEYS = Object.keys(CITEHTSEA);
+const CITEHTSEA_VALUES = Object.values(CITEHTSEA);
+const CITEHTSEA_LEN = CITEHTSEA_KEYS.length;
 
 contract('TokensEqualTextERC998', async accounts => {
-
   it("correct number of ERC721 tokens should exist", async () => {
-    await tetDeploy(accounts[2]);
-  });
-  
-  return;
-  
-  it("correct number of ERC721 tokens should exist", async () => {
-    const erc721 = await TokensEqualTextERC721.deployed();
-    const numChildren = await erc721.totalSupply();
-    assert.equal(numChildren.toNumber(),
-                 aesthetic.figures.length
-                 + aesthetic.bases.length
-                 + aesthetic.backdrops.length
-                 + aesthetic.grounds.length);
+    const toi = await TOI.deployed();
+    assert.equal((await toi.totalSupply()).toNumber(), NUM_TOKENS);
   });
 
-  it("ERC721 tokens have correct IDs in correct order", async () => {
-    const erc721 = await TokensEqualTextERC721.deployed();
-    let tokenIndex = 0;
-    for(let i = 0; i < aesthetic.elements; i++) {
-      for (let j = 0; j < aesthetic[aesthetic.elements[i]].length; j++) {
-        const childToken = await erc721.tokenByIndex(tokenIndex);
-        assert.equal(childToken.toString(16),
-                     aesthetic[aesthetic.elements[i]][j],
-                     "ERC721 Token " + tokenIndex + " has wrong ID");
-        tokenIndex++;
-      }
+  it("reversals in contract's citehtsea should be correct", async () => {
+    const toi = await TOI.deployed();
+    const reversals = await toi.reverse(CITEHTSEA_KEYS);
+    for (let i = 0; i < CITEHTSEA_LEN; i++) {
+      assert.equal(reversals[i], CITEHTSEA_VALUES[i]);
     }
   });
 
-  it("correct number of ERC998 tokens should exist", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const numChildren = await erc998.totalChildContracts(aesthetic.num_tokens
-                                                         + 1);
-    assert.equal(numChildren.toNumber(), 0);
+  it("non-existent reversals should be null", async () => {
+    const toi = await TOI.deployed();
+    const reversals = await toi.reverse(["0x0777"]);
+    assert.deepEqual(reversals, [ "0x0000000000000000000000000000000000000000000000000000000000000000" ]);
   });
-
-  it("ERC998 tokens should each have 1 child contract", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    for (let i = 1; i <= aesthetic.num_tokens; i++) {
-      const numChildren = await erc998.totalChildContracts(i);
-      assert.equal(numChildren.toNumber(),
-                   1,
-                   "ERC998 token" + i + "has wrong number of child contracts");
-    }
-  });
-
-  it("ERC998 tokens should own 4 ERC721 child tokens each", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    for (let i = 1; i <= aesthetic.num_tokens; i++) {
-      const childContract = await erc998.childContractByIndex(i, 0);
-      const total = await erc998.totalChildTokens(i, childContract);
-      assert.equal(total.toNumber(),
-                   4,
-                   "ERC998 token" + i + "has wrong number of children");
-    }
-  });
-
-  it("ERC998 tokens should own correct ERC721 child tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    for (let tokenID = 1; tokenID <= aesthetic.num_tokens; tokenID++) {
-      const childContract = await erc998.childContractByIndex(tokenID, 0);
-      for(let i = 0; i < 4; i++) {
-        const childToken = await erc998.childTokenByIndex(tokenID,
-                                                          childContract,
-                                                          i);
-        // TokenID -1 will be the index in the original (zero indexed) arrays
-        assert.equal('0x' + childToken.toString(16),
-                     aesthetic[aesthetic.elements[i]][tokenID - 1],
-                     "ERC998 token" + i + "has wrong children");
-      }
-    }
-  });
-
-  it("only owner can batch mint ERC721 tokens", async () => {
-    const erc721 = await TokensEqualTextERC721.deployed();
+ 
+  it("owner can transfer ERC721 tokens", async () => {
+    const toi = await TOI.deployed();
     try {
-      await erc721.mintBatch(accounts[1],
-                             [100, 200, 300],
-                             {from: accounts[1]});
-      assert(false, "ERC721 should throw if non-owner calls mintBatch");
-    } catch (error) {}
-  });
-
-  it("only owner can batch mint ERC998 tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const erc721 = await TokensEqualTextERC721.deployed();
-    try {
-      await erc998.mintTokenWithChildTokens(accounts[1],
-                                            erc721.address,
-                                            [100, 200, 300],
-                                            {from: accounts[1]});
-      assert(true, "ERC998 should throw if non-owner calls mintBatch");
-    } catch (error) {}
-  });
-
-  it("owner can transfer ERC998 tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    try {
-      const result = await erc998.transferFrom(accounts[0],
+      const result = await toi.transferFrom(accounts[0],
                                                accounts[1],
                                                1);
     } catch (error) {
-      assert(false, "Owner should be able to transfer ERC998 tokens");
+      assert(false, "Owner should be able to transfer TOI tokens");
     }
   });
 
-  it("only owner can transfer ERC998 tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
+  it("only owner can transfer ERC721 tokens", async () => {
+    const toi = await TOI.deployed();
     try {
-      await erc998.transferFrom(accounts[1],
+      await toi.transferFrom(accounts[1],
                                 accounts[2],
                                 2,
                                 {from: accounts[2]});
-      assert(false, "ERC998 should throw if non-owner tries to transfer token");
+      assert(false, "TOI should throw if non-owner tries to transfer token");
     } catch (error) {}
-  });
-
-  it("owner of ERC998 token can transfer child tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const erc721 = await TokensEqualTextERC721.deployed();
-    const token3_0 = await erc998.childTokenByIndex(3, erc721.address, 0)
-    try {
-      const result = await erc998.transferChild(3,
-                                                accounts[3],
-                                                erc721.address,
-                                                token3_0);
-    } catch (error) {
-      assert(false, "Owner should be able to transfer ERC998 child tokens");
-    }
-  });
-
-
-  it("only owner of ERC998 token can transfer child tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const erc721 = await TokensEqualTextERC721.deployed();
-    const token3_1 = await erc998.childTokenByIndex(3, erc721.address, 1)
-    try {
-      const result = await erc998.transferChild(3,
-                                                accounts[3],
-                                                erc721.address,
-                                                token3_1,
-                                                {from: accounts[4]});
-      assert(false, "Only owner should be able to transfer child tokens");
-    } catch (error) {}
-  });
-
-  it("token URLs are correct", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const uri = await erc998.tokenURI(3);
-    assert.equal(uri, "https://show.robmyers.org/tokens-equal-text/metadata/3");
   });
 
   it("token URLs can be updated", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    await erc998.updateTokenURIBase("aaa://newurl/");
-    const uri = await erc998.tokenURI(3);
-    assert.equal(uri, "aaa://newurl/3");
+    const tet998 = await TET998.deployed();
+    await tet998.updateTokenURIBase("aaa://newurl/");
+    assert.equal(await tet998.tokenURI(3), "aaa://newurl/3");
   });
-
-  it("ERC721 Enumeration interface: correct count of tokens", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    const total = await erc998.totalSupply();
-    assert.equal(total.toNumber(), aesthetic.num_tokens);
-  });
-
-  it("ERC721 Enumeration interface: correct token by index", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    for (let i = 0; i < aesthetic.num_tokens; i++) {
-      const id = await erc998.tokenByIndex(i);
-      // This is how we calculate the IDs internally, naughty detail exposing
-      assert.equal(id.toNumber(), i + 1);
-    }
-  });
-
-  it("ERC721 Enumeration interface: correct owner token by index", async () => {
-    const erc998 = await TokensEqualTextERC998.deployed();
-    let balance = await erc998.balanceOf(accounts[2]);
-    for (let i = 0; i < balance; i++) {
-      const id = await erc998.tokenOfOwnerByIndex(accounts[2], i);
-      // This is how we calculate the IDs internally, naughty detail exposing
-      assert.equal(id.toNumber(), i + 1);
-    }
-  });
-
 });
