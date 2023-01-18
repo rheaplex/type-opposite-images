@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -13,10 +13,10 @@ import "./IERC998ERC721TopDownEnumerable.sol";
 contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
     uint256 public constant NUM_TOKENS = 32;
 
-    address tet998;
+    address private tet998;
 
-    mapping(uint256 => bytes32) citehtsea;
-    
+    mapping(uint256 => bytes32) public citehtsea;
+
     constructor(address tet998Addr)
         ERC721("Type Opposite Images", "TOI")
     {
@@ -51,18 +51,22 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
         }
         return reversed;
     }
-    
+
     function tet998TokenChildCount(uint256 tokenId)
         public
         view
         returns(uint256)
     {
+        // This will actually error in the called function,
+        // so this is for clarity.
+        // Yes, the 998 is also a 721.
+        require(ERC721(tet998).ownerOf(tokenId) != address(0), "No such token");
+        ERC998ERC721TopDownEnumerable
+            enumerable = ERC998ERC721TopDownEnumerable(tet998);
         // No memory dynamic arrays in Solidity.
         // So we walk the tree to calculate this.
         // It would be fantastically wasteful to ever call this onchain.
         uint256 childIdCount = 0;
-        ERC998ERC721TopDownEnumerable enumerable
-            = ERC998ERC721TopDownEnumerable(tet998);
         uint256 numChildContracts = enumerable.totalChildContracts(tokenId);
         for (uint256 c = 0; c < numChildContracts; c++) {
             address childContract = enumerable.childContractByIndex(
@@ -89,9 +93,9 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
         uint256 childIdCount = tet998TokenChildCount(tokenId);
         childIds = new uint256[](childIdCount);
         if (childIdCount > 0) {
+            ERC998ERC721TopDownEnumerable
+                enumerable = ERC998ERC721TopDownEnumerable(tet998);
             uint256 childIdArrayIndex = 0;
-            ERC998ERC721TopDownEnumerable enumerable
-                = ERC998ERC721TopDownEnumerable(tet998);
             uint256 numChildContracts = enumerable.totalChildContracts(tokenId);
             for (uint256 c = 0; c < numChildContracts; c++) {
                 address childContract = enumerable.childContractByIndex(
@@ -131,11 +135,15 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
         }
         return reversals;
     }
-    
+
     function setTet998Addr(address tet998Addr)
         public
         onlyOwner
     {
+        require(
+            tet998Addr != address(0),
+            "Cannot assign to 0x0, use burn address"
+        );
         tet998 = tet998Addr;
     }
 

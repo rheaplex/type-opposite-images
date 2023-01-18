@@ -8,8 +8,10 @@
   },
   "scripts": {
     "test": "truffle test",
-    "lintjs": "npx eslint app/js/offline.js app/js/online.js app/js/shared.js migrations/* test/*.js",
-    "lintsol": "solium -d contracts",
+    "eslint": "npx eslint app/js/offline.js app/js/online.js app/js/shared.js migrations/* test/*.js",
+    "solium": "solium -d contracts",
+    "ethlint": "solhint contracts/*.sol",
+    "mythx": "mythx analyze --solc-path /usr/local/bin/solc contracts/TypeOppositeImages.sol",
     "ethnode": "ganache --port 9545 --chain.chainId 1337 --chain.networkId 1337 --mnemonic 'test test test test test test test test test test test junk'",
     "aesthetic": "node scripts/gen-aesthetic.js",
     "metadata": "node scripts/gen-metadata.js",

@@ -1,0 +1,10 @@
+output: mythx.txt
+format: table
+
+analyze:
+    scenario: solidity
+    mode: standard
+    create-group: true
+    group-name: TOI
+    remappings:
+        - "@openzeppelin/=./node_modules/@openzeppelin/"

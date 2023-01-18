@@ -1,9 +1,20 @@
 {
   "extends": "solium:recommended",
-  "plugins": ["security"],
+  "plugins": [
+    "security"
+  ],
   "rules": {
-    "quotes": ["error", "double"],
-    "indentation": ["error", 4],
-    "linebreak-style": ["error", "unix"]
+    "quotes": [
+      "error",
+      "double"
+    ],
+    "indentation": [
+      "error",
+      4
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ]
   }
 }
