@@ -171,7 +171,8 @@ var aesthetic = {
   ],
   elements: [ "figures", "bases", "backdrops", "grounds" ],
   num_tokens: 32,
-}
+};
+
 if (typeof module !== "undefined") {
-  module.exports = aesthetic
+  module.exports = aesthetic;
 }
