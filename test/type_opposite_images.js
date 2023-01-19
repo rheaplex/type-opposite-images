@@ -87,8 +87,17 @@ contract('TypeOppositeImages', async accounts => {
   });
 
   it("token URLs can be updated", async () => {
-    const tet998 = await TET998.deployed();
-    await tet998.updateTokenURIBase("aaa://newurl/");
-    assert.equal(await tet998.tokenURI(3), "aaa://newurl/3");
+    const toi = await TOI.deployed();
+    await toi.setBaseUri("aaa://newurl/");
+    assert.equal(await toi.tokenURI(3), "aaa://newurl/3");
   });
+
+  it("only owner can set token URLs", async () => {
+    const toi = await TOI.deployed();
+    try {
+      await toi.setBaseUri("aaa://newerurl/", { from: accounts[2] });
+      assert(false, "TOI should throw if non-owner tries to set base URL");
+    } catch (error) {}
+  });
+
 });

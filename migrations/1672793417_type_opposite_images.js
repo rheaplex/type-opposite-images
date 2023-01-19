@@ -5,9 +5,6 @@ module.exports = async (deployer) => {
   const tet998 = await TET998.deployed();
   await deployer.deploy(
     TOI,
-    tet998.address,
-    {
-      gas: 6000000,
-    }
+    tet998.address
   );
 };

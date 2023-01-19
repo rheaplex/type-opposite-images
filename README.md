@@ -1,20 +1,17 @@
-NOTES
-=====
+Type Opposite Images
+====================
 
-Token Creation Gas
-------------------
+By Rhea Myers.
 
-Bulk NFT token generation is costly. We can create the ERC721 tokens in the
-contract constructor but we run out of gas if the contract implements
-ERC721Enumerable. Creating ERC998 tokens in the constructor is possible for
-at most a couple of tokens before we run out of gas. So constructors are not
-the right location for token creation in this scenario.
+_Type Opposite Images_ (TOI) translates _Tokens Equals Text_'s vaporwave pastoral into a post-apocalyptic landscape of nuclear fallout and killer robots.
 
-I tried a builder contract that acted as a migration proxy. It would create the
-contracts then create the tokens en masse but that proved to be over-engineered
-and cause problems with msg.sender based access control.
+Tracking both the mood and the technological progression of the crypto artworld, it is a reversal and a composition. It might even be utility, although that doesn't accrue to the original.
 
-For the amount of tokens that needed creating and composing for this project
-the correct solution turned out to be adding access controlled batch token
-creation functions to the ERC721 and ERC998 contracts and creating and
-attaching the tokens (in batches) during migration.
+The generated images show the tokens at the time of deployment. Use the app code for a live view.
+
+Licensing
+=========
+
+Code: GPLv3 or later at your option.
+
+Images (live and generated): CC0 if copyrightable.

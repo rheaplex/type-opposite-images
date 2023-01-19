@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// Author:                  Rhea Myers <rhea@myers.studio>
+// Copyright:               2023 Myers Studio, Ltd.
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -15,6 +17,8 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
 
     address private tet998;
 
+    string private baseUri;
+    
     mapping(uint256 => bytes32) public citehtsea;
 
     constructor(address tet998Addr)
@@ -153,6 +157,14 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
 
     function unpause() public onlyOwner {
         _unpause();
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseUri;
+    }
+
+    function setBaseUri(string calldata newUri) external onlyOwner {
+        baseUri = newUri;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
