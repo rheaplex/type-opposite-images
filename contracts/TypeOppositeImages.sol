@@ -17,7 +17,7 @@ contract TypeOppositeImages is ERC721, ERC721Enumerable, Pausable, Ownable {
 
     address private tet998;
 
-    string private baseUri;
+    string private baseUri = "ipfs://Qmc3fsEYpuNsDsw2CJyctCq7j2KL3FDDDf3pWvCm84qoiq/";
     
     mapping(uint256 => bytes32) public citehtsea;
 

@@ -4,7 +4,7 @@ const NUM_TOKENS = 32;
 const TOKEN_BASE = 1;
 
 const IMG_URL_BASE =
-      "ipfs://";
+      "ipfs://QmPLQ4sbgpu1VZ7VQ1QPacEeScBmKbCVFzowQH8xo62DJm";
 const SHOW_URL_BASE =
       "https://show.rhea.art/type-opposite-images/app/index.html";
 

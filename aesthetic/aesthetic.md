@@ -5,7 +5,7 @@ icbm launching
 aerial hunter-killer drone circling
 aerial drone attacking
 anthropomorphic hunter-killer
-electronic countermeasures
+    electronic countermeasures
 black ice
 nuclear blackout
 improvised electronic device
@@ -42,10 +42,10 @@ twisted metal
 mangled wreckage
 ash
 dust
-human skulls
+    human skulls
 collapsed building
-melted sand
-broken glass
+    melted sand
+    broken glass
 dried out river bed
 bomb crater
 bomb site
@@ -60,45 +60,45 @@ tunnel
 Backdrops
 =========
 
-thermal radiation
-ionizing radiation
-residual radiation
-gamma radiation
-x rays
+    thermal radiation
+    ionizing radiation
+    residual radiation
+    gamma radiation
+    x rays
 hydrodynamic front
 shockwave static overpressure
 shockwave dynamic pressure
 blast winds
-nuclear flash
+    nuclear flash
 thermal pulse
 
 mirv
 
-collapsed pylon
-collapsed bridge
+    collapsed pylon
+    collapsed bridge
 collapsed power lines
 shattered windows
 blown-out window
 blasted skyline
 blasted cityscape
-bombed-out cityscape
+    bombed-out cityscape
 destroyed cityscape
-cityscape silhouetted by a nuclear blast
+    cityscape silhouetted by a nuclear blast
 burning refinery
 burning city
 lidar points
-heads up display
-ML labeling overlay targeting
-night vision blurs
-targeting laser
+    heads up display
+    ML labeling overlay targeting
+    night vision blurs
+    targeting laser
 exhaust trails
-smoke trails
+    smoke trails
 XXXXX warning sign
 XXXXX warning stripes
 XXXXX flashing light
-ruins
+    ruins
 
-icbms arcing overhead
+    icbms arcing overhead
 
 
 Grounds
@@ -109,53 +109,53 @@ Grounds
 neutron burst
 
 wasteland
-radioactive wasteland
+    radioactive wasteland
 barren fields
-fields of ash
-nuclear detonation
-nuclear blast
-nuclear elelectromagnetic pulse
-pressure wave
-blast wave
-shockwave
-heat wave
-firestorm
-mushroom cloud
-nuclear fallout
-fallout drifting down
-acid rain falling
-ash falling
-embers falling
+    fields of ash
+    nuclear detonation
+    nuclear blast
+    nuclear elelectromagnetic pulse
+    pressure wave
+    blast wave
+    shockwave
+    heat wave
+    firestorm
+    mushroom cloud
+    nuclear fallout
+    fallout drifting down
+    acid rain falling
+    ash falling
+    embers falling
 dust clouds
-dust storm
+    dust storm
 electrical discharge
-nuclear exchange
+    nuclear exchange
 global thermonuclear war
 SKYNET RISE XXXXXXXXX
-mutually assued destruction
-air burst
-ground burst
-ground zero
-heat haze
-nuclear winter
-ground shock
-nuclear fireball
-radioactive debris cloud
+mutually assured destruction
+    air burst
+    ground burst
+    ground zero
+    heat haze
+    nuclear winter
+    ground shock
+    nuclear fireball
+    radioactive debris cloud
 
-black rain
+    black rain
 
-acid rain
+    acid rain
 
-nuclear winter
-nuclear epocalypse
+    nuclear winter
+    nuclear apocalypse
 kinetic bombardment
 
-vortex ring
+    vortex ring
 
-burning skies
-scorched earth
+    burning skies
+    scorched earth
 rope trick effect
-nuclear famine
+    nuclear famine
 nuclear first strike
 defcon one
 norad displays

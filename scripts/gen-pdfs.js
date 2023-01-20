@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const wkhtmltopdf = require('wkhtmltopdf');
 
 const aesthetic = require('../aesthetic/aesthetic.js');
+const citehtsea = require('../aesthetic/citehtsea.js');
 
 // Copy and paste antipattern
 
@@ -33,13 +34,16 @@ const strToColour = str => {
 };
 
 for(let i = 0; i < aesthetic.num_tokens; i++) {
+  console.log(`${i + 1} ----------------------------------------`);
   let lines = aesthetic.elements.map(element => {
     // Get element, strip leading '0x'
-    const item = aesthetic[element][i].substr(2);
+    const item = citehtsea[aesthetic[element][i]].substr(2);
     const text = hexToString(item);
+    console.log(text);
     //const colour = strToColour(item);
     return `      <div class="text">${text}</div>`;
   }).join("\n");
+  console.log("");
   // Copy and paste antipattern
   const html =
         // wkhtmltopdf version. Dated html but much better colours.
