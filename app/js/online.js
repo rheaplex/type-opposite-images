@@ -1,161 +1,86 @@
-let tokensEqualText
-let parentTokenIDs
+/*  Type Opposite Images - Tokens Equal Text's evil twin.
+    Copyright (C) 2023 Myers Studio Ltd.
 
-// Get a list of parent token IDs, slowly in series.
-// We could speed this up with better use of Web3 and promise handling
-// but it's just 16 tokens that  we could hardcode anyway.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-const updateParentTokenIDs = async () => {
-  let ids = []
-  const supply = await tokensEqualText.totalSupply()
-  const numParentTokens = web3.toDecimal(await tokensEqualText.totalSupply())
-  for (let i = 0; i < numParentTokens; i++) {
-    const tokenID = await tokensEqualText.tokenByIndex(i)
-    ids.push(tokenID.toString(10))
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import { ethers } from "./ethers.js";
+
+export const toText = (text) => {
+  return ethers.utils.toUtf8String(text);//.replace(/\0+$/, "");
+};
+
+export const ensureTokenId = (numEditions, defaultTokenId) => {
+  const id = window.location.hash.substr(1);
+  if (id < 1 || id > numEditions) {
+    // Reload the page with a working token id
+    window.location.replace(window.location.pathname + `#${defaultTokenId}`);
   }
-  parentTokenIDs = ids
-}
+  return ethers.BigNumber.from(id);
+};
 
-// If the local storage isn't yet initialized, initialize it.
-// If the blockchain state changed so that the local storage refers to a now
-// non-existent token, default to a token that does exist.
-// This will break if no tokens remain.
+export const initNetwork = async (contractName) => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  // Just reload the window if the network changes
+  provider.on('chainChanged', (chainId) => { window.location.reload(); });
+  const chainName = await provider.getNetwork().name;
+  const contractPath = `./js/${contractName}.json`;
+  const response = await fetch(contractPath);
+  const json = await response.json();
+  const contract = new ethers.Contract(
+    json.networks[(await provider.getNetwork()).chainId].address,
+    json.abi,
+    provider
+  );
+  return [ provider, contract ];
+};
 
-const ensureCurrentTokenIDValid = () => {
-  const id = localStorage.getItem('currentTokenID')
-  if ((parentTokenIDs == null)
-      || (parentTokenIDs.findIndex(i => i == id) === -1)) {
-    localStorage.setItem('currentTokenID', parentTokenIDs[0])
-  }
-}
+let NUM_EDITIONS = 32;
+let DEFAULT_TOKEN_ID = 1;
 
-const setTokenSelects = async () => {
-  $('#token-id-select').empty()
-  const currentToken = currentTokenID()
-  parentTokenIDs.forEach(value => {
-    let selected = ""
-    if (value == currentToken) {
-      selected = " selected"
-    }
-    $(`<option value="${value}"${selected}>${value}</option>`)
-      .appendTo($('#token-id-select'))
-  })
-}
+let provider;
+let contract;
+let tokenId;
 
-const currentTokenID = () =>
-      parseInt(localStorage.getItem('currentTokenID'))
+const displayToken = async () => {
+  const texts = document.getElementById("texts");
+  (await contract.aestheticToCitehtsea(tokenId)).forEach(text => {
+    var div = document.createElement("div");
+    div.className = "text";
+    div.innerHTML = toText(text);
+    texts.append(div);
+  });
+};
 
-const tokenOwnedIDs = async tokenID => {
-  let IDs = []
-  // Get children of ID from contract
-  const childContractCount = await tokensEqualText.totalChildContracts(tokenID)
-  for(let i = 0; i < childContractCount; i++) {
-    const childContract = await tokensEqualText.childContractByIndex(tokenID, i)
-    const childTokenCount
-          = await tokensEqualText.totalChildTokens(tokenID, childContract)
-    for(let j = 0; j < childTokenCount; j++) {
-      const childID = await tokensEqualText.childTokenByIndex(tokenID,
-                                                              childContract,
-                                                              j)
-      // These may not be unique but that's not a problem, we are using them
-      // as content not identifiers
-      IDs.push(childID.toString(16))
-    }
-  }
-  return IDs
-}
+const main = async (event) => {
+  [ provider, contract ] = await initNetwork("TypeOppositeImages");
 
-const childTokenEventHandler = async (err, result) => {
-  if(err) {
-    console.log(err)
-    return
-  }
-  const currentToken = currentTokenID()
-  // We cache child IDs not child contracts, so this would have false
-  // positives in a more complex token environment
-  if (result._childTokenID == curentToken) {
-    updateStrings(currentToken)
-  }
-}
+  tokenId = ensureTokenId(NUM_EDITIONS, DEFAULT_TOKEN_ID);
 
-const maybeSetTokenFromHash = () => {
-  let status = true
-  const tokenFromURLHash = new URL(document.location).hash.substr(1)
-  if (tokenFromURLHash !== "") {
-    const tokenNum = parseInt(tokenFromURLHash, 10)
-    if ((tokenNum < 1)
-        || (tokenNum > parentTokenIDs.length)) {
-      $('#help').text('No such token.')
-      status = false
-    } else {
-      localStorage.setItem('currentTokenID', tokenFromURLHash)
-    }
-  }
-  return status
-}
+  await displayToken();
 
-$(document).ready(async () => {
-  const helpText = $('#help').text()
-  $('#help').text('Loading resources from Ethereum.')
-  const json = await $.getJSON('../build/contracts/TokensEqualTextERC998.json')
+/*  const status = contract.filters.Status(
+    tokenId,
+    null
+  );
 
-  if (typeof web3 !== 'undefined') {
-    web3 = new Web3(web3.currentProvider)
-  } else {
-    // Set the provider you want from Web3.providers
-    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-  }
-  const TokensEqualText = TruffleContract(json)
-  TokensEqualText.setProvider(web3.currentProvider)
-  tokensEqualText = await TokensEqualText.deployed()
+  contract.on(status, (id, is_art) => {
+    setDisplayState(is_art);
+  });*/
 
-  await updateParentTokenIDs()
-  $('#help').text(helpText)
-  let ok = maybeSetTokenFromHash()
-  if (! ok) {
-    return
-  }
-  ensureCurrentTokenIDValid()
-  await setTokenSelects()
+};
 
-  //tokensEqualText.TransferChild().watch(childTokenEventHandler)
-
-  //tokensEqualText.ReceivedChild().watch(childTokenEventHandler)
-
-  // If we were worried about ownership
-  /*
-  // This also catches burns
-
-  tokensEqualText.Transfer()
-    .watch(async (err, result) => {
-      if(err) {
-        console.log(err)
-        return
-      }
-      await updateTokenIDs()
-      await setTokenSelects()
-      ensureCurrentTokenIDValid()
-      updateStrings(currentTokenID())
-    })
-  */
-
-  const parentTokenID = currentTokenID()
-  updateStrings(parentTokenID)
-
-  $('#content').click(() => $('#ui').fadeIn())
-
-  $('#token-id-cancel').click(event => {
-    event.stopPropagation()
-    $('#ui').fadeOut()
-  })
-
-  $('#token-id-ok').click(event => {
-    event.stopPropagation()
-    localStorage.setItem('currentTokenID', $('#token-id-select').val())
-    updateStrings(currentTokenID())
-    $('#ui').fadeOut()
-  })
-
-  $('#help').fadeOut(8000)
-
-})
+window.addEventListener("DOMContentLoaded", main);
+window.addEventListener('hashchange', () => window.location.reload(), false);

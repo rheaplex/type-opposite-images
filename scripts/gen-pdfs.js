@@ -92,7 +92,7 @@ for(let i = 0; i < aesthetic.num_tokens; i++) {
 
       .text {
         font-size: 482.316pt; /* px value but points unit for wkhtmltopdf */
-        font-family: 'Helvetica Now Text', SansSerif;
+        font-family: 'Helvetica Now Text', Sans-Serif;
         font-weight: bold;
         white-space: nowrap;
         color: white;

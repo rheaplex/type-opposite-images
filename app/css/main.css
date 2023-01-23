@@ -1,69 +1,41 @@
 html {
-  height: 100vh;
+  line-height: 1.15;
+  height: 100%;
+  background: black;
 }
 
 body {
-  height: 100vh;
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
   overflow: hidden;
+  transform: scale(-1, 1);
+}
+
+#wrapper {
+  display: table;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }
 
 #content {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* h3... */
-
-#help {
-    font-size: 1.17em;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0;
-    margin-right: 0;
-    font-weight: bold;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
 }
 
 #texts {
+  display: inline-block;
+  text-align: left;
 }
 
 .text {
-  font-family: 'Old Standard TT', serif;
-  font-weight: 700;
-  font-style: normal;
-  font-size: 72px;
-  letter-spacing: -0.075em;
-  text-transform: uppercase;
+  font-size: 12vh;
+  font-family: 'Helvetica Now Text', Sans-Serif;
+  font-weight: bold;
   white-space: nowrap;
-}
-
-#help {
-  z-index: 1000;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  font-family: sans;
-}
-
-#ui {
-  display: none;
-  z-index: 2000;
-  position: absolute;
-  left: 40%;
-  top: 40%;
-  margin: auto 2em;
-  font-family: sans;
-}
-
-#token-id-form {
-  margin: auto;
-  padding: 1em;
-  background: #FFFFFF;
-  border: 2px solid grey;
-  border-radius: 0.25em;
-  box-shadow:  0.25em 0.25em 0.5em #444444;
+  color: white;
 }
